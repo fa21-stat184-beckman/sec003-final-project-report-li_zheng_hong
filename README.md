@@ -11,7 +11,7 @@ Polished & professional written investigation of your final project topic.  The 
 
 #### Final Project Report
 
-- Polished & professional written investigation of your final project.  The Final Project Report must be submitted to Canvas an R Notebook (i.e., with embedded Rmd) before the deadline.  Grading details are provided below, but if there is eventually some discrepancy with Canvas, the Canvas rubric serves as the official standard.
+- Polished & professional written investigation of your final project. The Final Project Report must be submitted to Canvas an R Notebook (i.e., with embedded Rmd) before the deadline.  Grading details are provided below, but if there is eventually some discrepancy with Canvas, the Canvas rubric serves as the official standard.
 
 
 #### Final Project Checklist

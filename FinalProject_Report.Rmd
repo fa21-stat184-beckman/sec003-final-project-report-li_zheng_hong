@@ -1,14 +1,271 @@
 ---
 title: "Final Project Report"
-author: "AUTHOR NAME(S)"
-date: "Due: DATE"
+author: "Jiayi Li"
+date: "Dec, 14, 2021"
 output: html_notebook
 ---
 
 
+## Final Project Report 
+
+
+* Jiayi Li
+* December, 14, 2021
+
+
+### Clean Up Environment and Load Libraries 
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(dbplyr)
+library(ggplot2)
+```
+
+
+### Data Intake 
+
+```{r}
+StateVaccination <- read.csv("state_vaccination.csv")
+```
+
+```{r}
+CovidCases <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
+```
+
+### Inspect data intake 
+
+* Inspect the StateVaccination data frame
+
+This data set is a state-by-state data on United States COVID-19 vaccinations, and created by *our world in data webiste* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/ federal entity.
+
+```{r}
+StateVaccination %>%
+  head()
+```
+
+```{r}
+StateVaccination %>%
+    str()
+```
+
+```{r}
+StateVaccination %>%
+    glimpse()
+```
+
+* Inspect the CovidCases data frame 
+
+This data set is found on DATA.GOV website, and it is created by CDC. CDC reports aggregate counts of COVID-19 cases and death numbers daily online. Data on the COVID-19 website and CDC’s COVID Data Tracker are based on these most recent numbers reported by states, territories, and other jurisdictions. This data set of “United States COVID-19 Cases and Deaths by State over Time” combines this information. However, data are dependent on jurisdictions’ timely and accurate reporting. This data set is first created on November 10, 2020.
+
+```{r}
+
+CovidCases <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
+
+```
+
+```{r}
+CovidCases %>% 
+  head()
+
+```
+
+```{r}
+CovidCases %>%
+    str()
+```
+
+```{r}
+CovidCases %>%
+    glimpse()
+
+```
+
+
+How does the growth of COVID-19 cases change in response to the growth vaccination rate in each state from 1-10-2021 to 11-10-2021? 
+
+
+
+### Data Wrangling and Cleaning 
+
+1. StateVaccination 
+
+* location has some invalid value. Here we eliminate invalid value from location.
+
+```{r}
+states <-list("Alabama","Alaska","Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware","Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana","Maine", "Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska", "Nevada", "New Hampshire","New Jersey", "New Mexico", "New York State", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",  "Washington", "West Virginia", "Wisconsin","Wyoming")
+
+
+StateVaccination <- StateVaccination %>%
+  filter( location %in% states)
+
+StateVaccination %>%
+  select(location) %>%
+  unique() %>%
+  head()
+
+```
+
+
+```{r}
+StateVaccination <-
+  StateVaccination %>%
+  mutate(location = ifelse(location == "New York State", "New York", location))
+
+StateVaccination %>% 
+  select(location) %>%
+  head()
+
+
+```
+
+* Date need to be in the interval 1-12 ~ 11-10
+
+```{r}
+library(lubridate)
+
+
+StateVaccination <-
+StateVaccination %>%
+  filter(date <= ymd("2021-11-10"))
+```
+
+
+* Create new variable called month
+```{r}
+StateVaccination <-
+StateVaccination %>%
+  mutate(month = month(date))
+  
+```
+
+
+* Created a new variable called peopleVaccinated that contain the total number of vaccinated by the end of each month   
+
+```{r}
+CleanedStateVaccination <-
+  StateVaccination %>%
+  group_by(month, location) %>%
+  summarize(peopleVaccinatedMonthly = max(people_vaccinated, na.rm = TRUE)-min(people_vaccinated, na.rm = TRUE))
+
+CleanedStateVaccination %>% head()
+
+```
+
+2. CovidCases
+
+* create attribute month based on submission date 
+
+submission date indicate the date that the data was submitted and recorded of. It is originally character data type, so we first convert it to date date type. Then we create a new attribute called month, taking the month extracted from date, using mutate(). 
+
+
+```{r}
+library(lubridate)
+
+```
+
+
+```{r}
+CovidCases <-
+  CovidCases %>%
+  mutate(date = mdy(submission_date)) %>%
+  filter(date > mdy("12-31-2020")) %>%
+  arrange(submission_date) %>%
+  mutate(month = month(date)) 
+
+CovidCases %>% head()
+
+```
+
+*  transform state attribute to contain full name
+
+In the primary source, location contains full state name. Thus, to facilitate operation on these two data source, we choose to make state attribute to contain full states' name. 
+
+Here we leverage on the abbr2state function provided by the usdata package
+
+```{r}
+install.packages("usdata")
+
+```
+
+```{r}
+library(usdata)
+```
+
+```{r}
+
+CovidCases <-
+  CovidCases %>%
+  mutate(state = abbr2state(state))
+
+CovidCases %>% 
+  select(state) %>%
+  unique() %>%
+  head()
+ 
+
+
+```
+
+from the previous result, we can see that there are rows with null value, and here district of columbia is treated as one state. To stay in accordance with the primary data source, we choose to simply remove rows with state being NA and district of columbia. 
+
+```{r}
+states <-list("Alabama","Alaska","Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware","Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana","Maine", "Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska", "Nevada", "New Hampshire","New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",  "Washington", "West Virginia", "Wisconsin","Wyoming")
+
+CovidCases <-
+CovidCases %>%
+  filter(state %in% states) 
+
+CovidCases %>% select(state) %>%
+  unique() %>%
+  head()
+
+```
+
+* eliminate negative value in new cases and aggregate it into monthly new cases
 
 
 ```{r}
 
+CovidCases<-
+CovidCases %>%
+  mutate(new_case = ifelse(new_case < 0, 0, new_case)) 
+
+CovidCases %>%
+  filter(new_case < 0)
 
 ```
+
+```{r}
+
+CleanCovidCases <-
+CovidCases %>%
+  group_by(state, month) %>%
+  summarize(monthlyNewCases = sum(new_case, na.rm = TRUE))
+
+CleanCovidCases %>%
+  head()
+```
+
+
+### Data Visualization
+
+```{r fig.height=4, fig.width=4}
+CleanCovidCases %>%
+  ggplot(aes(x = month, y = monthlyNewCases))+
+  geom_line(aes(color = state))
+  
+```
+
+
+```{r}
+
+CleanedStateVaccination %>%
+  ggplot(aes(x = month, y = peopleVaccinatedMonthly))+
+  geom_line(aes(color = location))
+  
+
+```
+
+from the above figures, we can see that the number of monthly new cases for most states has dropped from January to June. around the same time (January to mid April, the number of people vaccinated monthly has also been increased. The monthly new COVID-19 cases started to increase from June to mid August, and from September to now (early Nov), the monthly new cases for all states seems to decrease a little. The number of people vaccinated monthly has been decreased for most state from early April to early July, then started to increase around mid-July to August. From August to early-Nov, the number of people getting vaccinated fluctuate a little. 
+
+
