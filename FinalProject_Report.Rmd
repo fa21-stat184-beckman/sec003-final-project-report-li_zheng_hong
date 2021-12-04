@@ -23,8 +23,8 @@ The narrative text (e.g., sentences and paragraphs describing the progression of
 5. Is completely free of errors in spelling and grammar
 
 
-How does the growth of COVID-19 cases change in response to the growth vaccination rate in each state from 1-10-2021 to 11-10-2021? 
 
+From 1-20-2021 to 11-10-2021，Which region of United States (the Northeast, South, West, and Midwest) deals COVID-19 better based the vaccination rate and Covid-19 cases? 
 
 
 ### Clean Up Environment and Load Libraries 
@@ -50,7 +50,7 @@ CovidCases <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Ti
 
 * Inspect the StateVaccination data frame
 
-The data set StateVaccination is a state-by-state data on United States COVID-19 vaccinations, and is created by *our world in data webiste* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/ federal entity.
+The data set StateVaccination is a state-by-state data on United States COVID-19 vaccinations, and is created by *our world in data webiste* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/federal entity.
 
 ```{r}
 StateVaccination %>%
@@ -71,11 +71,7 @@ StateVaccination %>%
 
 The data set CovidCases is found on DATA.GOV website, and it is created by CDC. CDC reports aggregate counts of COVID-19 cases and death numbers daily online. Data on the COVID-19 website and CDC’s COVID Data Tracker are based on these most recent numbers reported by states, territories, and other jurisdictions. This data set of “United States COVID-19 Cases and Deaths by State over Time” combines this information. However, data are dependent on jurisdictions’ timely and accurate reporting. This data set is first created on November 10, 2020.
 
-```{r}
 
-CovidCases <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
-
-```
 
 ```{r}
 CovidCases %>% 
@@ -163,8 +159,8 @@ CleanedStateVaccination <-
 ```{r}
 CleanedStateVaccination %>% head()
 ```
-joins for multiple data tables. 
-`pivot_wider` & `pivot_longer`
+
+
 
 
 2. CovidCases
@@ -301,6 +297,62 @@ CleanedStateVaccination %>%
 CombinedData %>%
     head()
 ```
+
+
+```{r}
+
+northeast<- c("Connecticut","Maine","Massachusetts","New Hampshire", "Rhode Island", "Vermont", "New Jersey", "New York", "Pennsylvania")
+
+midwest <- c("Illinois", "Indiana", "Michigan", "Ohio", "Wisconsin", "Iowa", "Kansas", "Minnesota", "Missouri", "Nebraska", "North Dakota","South Dakota")
+
+south <- c("Delaware", "Florida",  "Georgia", "Maryland", "North Carolina", "South Carolina", "Virginia", "Washington",  "West Virginia", "Alabama", "Kentucky", "Mississippi", "Tennessee", "Arkansas", "Louisiana", "Oklahoma", "Texas")
+
+west <- c("Arizona", "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming","Alaska", "California", "Hawaii", "Oregon","Washington")
+
+
+
+
+convertToRegion <- function(data){
+  for(i in 1:nrow(data)) {       # for-loop over columns
+  if (data[ i,2 ] %in% northeast){
+    data[i,2] <-"Northeast"
+  }else if (data[ i,2 ] %in% midwest){
+    data[i,2] <-"Midwest"
+  }else if (data[ i,2 ] %in% south){
+    data[i,2] <-"South"
+  }else if (data[ i,2 ] %in% west){
+    data[i,2] <-"West"
+  }
+    
+    
+  }
+  return(data)
+}
+
+```
+
+```{r}
+RegionData = CombinedData
+
+
+```
+
+```{r}
+RegionData = convertToRegion(RegionData)
+
+RegionData
+
+```
+```{r}
+avgRegionData <-
+RegionData %>% 
+  group_by(state, month) %>%
+  summarize(avgVaccinated = mean(peopleVaccinatedMonthly), avgNewCases = mean(monthlyNewCases))
+  
+  
+avgRegionData
+
+```
 ### Data Visualization
 
 ```{r fig.height=4, fig.width=4}
@@ -311,7 +363,7 @@ CleanCovidCases %>%
 ```
 
 
-```{r}
+```{r fig.height=4, fig.width=4}
 
 CleanedStateVaccination %>%
   ggplot(aes(x = month, y = peopleVaccinatedMonthly))+
@@ -323,3 +375,10 @@ CleanedStateVaccination %>%
 from the above figures, we can see that the number of monthly new cases for most states has dropped from January to June. around the same time (January to mid April, the number of people vaccinated monthly has also been increased. The monthly new COVID-19 cases started to increase from June to mid August, and from September to now (early Nov), the monthly new cases for all states seems to decrease a little. The number of people vaccinated monthly has been decreased for most state from early April to early July, then started to increase around mid-July to August. From August to early-Nov, the number of people getting vaccinated fluctuate a little. 
 
 
+```{r fig.height=4, fig.width=4}
+avgRegionData %>%
+  ggplot(aes(x = avgVaccinated, y = avgVaccinated))+
+  geom_point(aes(shape = state, color = state))+
+  facet_wrap(~month)
+
+```
