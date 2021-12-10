@@ -377,8 +377,25 @@ from the above figures, we can see that the number of monthly new cases for most
 
 ```{r fig.height=4, fig.width=4}
 avgRegionData %>%
-  ggplot(aes(x = avgVaccinated, y = avgVaccinated))+
+  ggplot(aes(x = avgVaccinated, y = avgNewCases))+
   geom_point(aes(shape = state, color = state))+
   facet_wrap(~month)
+
+```
+
+
+```{r}
+
+avgRegionData %>%
+  ggplot(aes(x = month, y = avgNewCases))+
+  geom_line(aes(color = state))
+  
+
+```
+
+```{r}
+avgRegionData %>%
+  ggplot(aes(x = month, y = avgVaccinated))+
+  geom_line(aes(color = state))
 
 ```
