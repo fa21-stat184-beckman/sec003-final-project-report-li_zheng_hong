@@ -20,6 +20,7 @@ The narrative text (e.g., sentences and paragraphs describing the progression of
 2. Explains why this topic is important and/or interesting to investigate
 3. Clearly describes one significant technical challenge encountered during the investigation and how you did or did not overcome it 
 4. Explains one or more significant findings or conclusions of your investigation that is **clearly related to the guiding/research question**
+\n 
 5. Is completely free of errors in spelling and grammar
 
 
@@ -53,7 +54,7 @@ CovidCases <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Ti
 
 * Inspect the StateVaccination data frame
 
-The data set StateVaccination is a state-by-state data on United States COVID-19 vaccinations, and is created by *our world in data webiste* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/federal entity.
+The data set StateVaccination is a state-by-state data on United States COVID-19 vaccinations, and is created by *our world in data website* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/federal entity.
 
 ```{r}
 StateVaccination %>%
@@ -418,7 +419,7 @@ avgRegionData %>%
 avgRegionData %>%
   ggplot(aes(x = month, y = avgVaccinated))+
   geom_line(aes(color = state)) +
-  ggtitle("The avg number of people get vaccinated for each US region from Jan to Nov.")
+  ggtitle("The avg number of people get vaccinated for each US region from Jan to Nov")
 
 ```
 6. Here we use US map to better visualize the monthly new covid-19 cases for each state on June (lowest monthly new covid-19) and September(highest monthly new covid-19) for each state. 
