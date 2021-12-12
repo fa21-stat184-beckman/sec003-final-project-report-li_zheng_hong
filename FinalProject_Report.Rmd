@@ -27,6 +27,9 @@ The narrative text (e.g., sentences and paragraphs describing the progression of
 From 1-20-2021 to 11-10-2021，Which region of United States (the Northeast, South, West, and Midwest) deals COVID-19 better based the vaccination rate and Covid-19 cases? 
 
 
+
+
+
 ### Clean Up Environment and Load Libraries 
 ```{r}
 rm(list = ls())
