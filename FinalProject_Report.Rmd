@@ -1,13 +1,16 @@
 ---
 title: "Final Project Report"
-author: "Jiayi Li, Shengkai Zheng, Tianyi Hong"
+author: "Jiayi Li"
 date: "Dec, 14, 2021"
 output: html_notebook
 ---
 
 ## Final Project Report 
-* Jiayi Li, Shengkai Zheng, Tianyi Hong
+
+
+* Jiayi Li
 * December, 14, 2021
+
 
 From 1-20-2021 to 11-10-2021，Which region of the United States (the Northeast, South, West, and Midwest) deals COVID-19 better based on the vaccination rate and Covid-19 cases?
 
@@ -19,6 +22,9 @@ The biggest challenge we encountered in this project is the data wrangling part.
 We first visualize the distribution of values in the new_case for each state. Based on the figure “New Covid-19 Cases in States (daily)”, California is among the states which have a lot of negative value for the new case. We try to take a closer look at the negative new_case in California and find an explanation for those negative values. We found that the new_case for 06/30/2021 is negative: -4359. Meanwhile, the total_cases for 06/30/2021 is 3710454, 4359 less than the total_cases for 06/29/2021. Thus, we can conclude that new_case also accounts for people that are recovered from COVID-19. So, we decide to eliminate the negative value and leave the rest like that since the recovery portion is relatively small compared to the infected portion. It will not disturb our results. There are also some minor challenges we encountered in the data wrangling part, but we were able to use different techniques we learned in class to solve those problems. 
 
 Based on the visualizations, we were able to derive some meaningful insights. we found that the overall number of new covid-19 cases in the U.S has been decreased since January, hit the lowest in June, started to increase, and hit the highest point in September. Among the four regions, South seems to have the greatest number of new covid-19 cases in most of the months. There is not a big difference between the other three regions. For the number of people getting vaccinated, people in the South and Mideast are more actively get vaccinated than people in other regions. Overall, the number of people getting vaccinated hit the highest in April and then started to decrease.
+
+
+
 
 
 ### Clean Up Environment and Load Libraries 
@@ -44,7 +50,7 @@ CovidCases <- read_csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Ti
 
 * Inspect the StateVaccination data frame
 
-The data set StateVaccination is a state-by-state data on United States COVID-19 vaccinations, and is created by *our world in data webiste* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/federal entity.
+The data set StateVaccination is a state-by-state data on United States COVID-19 vaccinations, and is created by *our world in data website* which rely on the data updated daily by the United States Centers for Disease Control and Prevention. Their intention is to "maintain the database for the foreseeable future and include additional countries as they implement their vaccination campaigns".This data set is first created on 1/12/2021 and contains data of vaccination related data for each states/federal entity.
 
 ```{r}
 StateVaccination %>%
@@ -91,16 +97,18 @@ CovidCases %>%
 
 1. StateVaccination 
 
-* The variable location has some invalid value. Here we eliminate invalid value from location.
+* The variable location has some invalid value. Here we eliminate invalid value from location by using a filter. 
 
 ```{r}
+
 states <-list("Alabama","Alaska","Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware","Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana","Maine", "Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska", "Nevada", "New Hampshire","New Jersey", "New Mexico", "New York State", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia",  "Washington", "West Virginia", "Wisconsin","Wyoming")
 
-
+# eliminate all the invalid value in states
 StateVaccination <- 
   StateVaccination %>%
   filter( location %in% states)
 
+# all the unique value in states
 StateVaccination %>%
   select(location) %>%
   unique() %>%
@@ -109,6 +117,7 @@ StateVaccination %>%
 
 
 ```{r}
+# here we change New York State to New York.
 StateVaccination <-
   StateVaccination %>%
   mutate(location = ifelse(location == "New York State", "New York", location))
@@ -140,9 +149,11 @@ StateVaccination %>%
 ```
 
 
-* Created a new variable called peopleVaccinated that contain the total number of vaccinated by the end of each month   
+* We create a Dataframe called CleanedStateVaccination that contain month, location, and a new variable called peopleVaccinated that contain the total number of people get vaccinated each month. Since the variable people_vaccinated is cumulative. We simply group by month and location and subtract the max people_vaccinated and min people_vaccinated to get the number of people get vaccinated each month.
+
 
 ```{r}
+
 CleanedStateVaccination <-
   StateVaccination %>%
   group_by(month, location) %>%
@@ -171,6 +182,8 @@ library(lubridate)
 
 
 ```{r}
+# create variable month 
+
   CovidCases<-
   CovidCases %>%
   mutate(month = str_extract(string = submission_date, pattern = "(^[0-9]{2})")) %>%
@@ -184,6 +197,7 @@ CovidCases %>%
 
 
 ```{r}
+# change month to numeric data type 
 CovidCases <-
 CovidCases %>%
     mutate(month = as.numeric(unlist(month)))
@@ -271,6 +285,7 @@ CovidCases %>%
 
 ```
 
+* Here we create CleanCovidCases DataFrame that contain state, month, and monthlyNewCases. 
 ```{r}
 
 CleanCovidCases <-
@@ -282,7 +297,7 @@ CleanCovidCases %>%
   head()
 ```
 
-
+* Here we create dataframe called CombinedData by joining CleanedStateVaccination and CleanCovidCaes.
 ```{r}
 CombinedData <-
 CleanedStateVaccination %>%
@@ -292,7 +307,7 @@ CombinedData %>%
     head()
 ```
 
-
+* Here we classify each state into four region: northeast, midwest, south, and west using the self-defined function: convertToRegion
 ```{r}
 
 northeast<- c("Connecticut","Maine","Massachusetts","New Hampshire", "Rhode Island", "Vermont", "New Jersey", "New York", "Pennsylvania")
@@ -337,6 +352,7 @@ RegionData = convertToRegion(RegionData)
 RegionData
 
 ```
+* Then we get the avgVaccinated and avgNewCases for each region in each month.
 ```{r}
 avgRegionData <-
 RegionData %>% 
@@ -349,47 +365,83 @@ avgRegionData
 ```
 ### Data Visualization
 
+1. Monthly New Covid-19 cases for each state through Jan to Nov
+
 ```{r fig.height=4, fig.width=4}
 CleanCovidCases %>%
   ggplot(aes(x = month, y = monthlyNewCases))+
-  geom_line(aes(color = state))
+  geom_line(aes(color = state))+
+  ggtitle("Monthly New Covid-19 cases for each state through Jan to Nov")
   
 ```
 
+2. Number of people get vaccinated each month for each state through Jan to Nov
 
 ```{r fig.height=4, fig.width=4}
 
 CleanedStateVaccination %>%
   ggplot(aes(x = month, y = peopleVaccinatedMonthly))+
-  geom_line(aes(color = location))
+  geom_line(aes(color = location)) +
+  ggtitle("Number of people get vaccinated each month for each state through Jan to Nov")
   
 
 ```
 
-from the above figures, we can see that the number of monthly new cases for most states has dropped from January to June. around the same time (January to mid April, the number of people vaccinated monthly has also been increased. The monthly new COVID-19 cases started to increase from June to mid August, and from September to now (early Nov), the monthly new cases for all states seems to decrease a little. The number of people vaccinated monthly has been decreased for most state from early April to early July, then started to increase around mid-July to August. From August to early-Nov, the number of people getting vaccinated fluctuate a little. 
+3. The average number of new covid-19 cases and average number of people get vaccinated for each US region from Jan to Nov.
 
-
-```{r fig.height=4, fig.width=4}
+```{r fig.height=4, fig.width=5.5}
 avgRegionData %>%
   ggplot(aes(x = avgVaccinated, y = avgNewCases))+
   geom_point(aes(shape = state, color = state))+
-  facet_wrap(~month)
+  facet_wrap(~month)+
+  ggtitle("average number of new covid-19 cases and average number of people get vaccinated for each US region from Jan to Nov")
 
 ```
 
-
+4. average number of new covid-19 cases for each US region from Jan to Nov
 ```{r}
 
 avgRegionData %>%
   ggplot(aes(x = month, y = avgNewCases))+
-  geom_line(aes(color = state))
+  geom_line(aes(color = state))+
+  ggtitle("average number of new covid-19 cases for each US region from Jan to Nov")
   
 
 ```
+5. The average number of people get vaccinated for each US region from Jan to Nov.
+
 
 ```{r}
 avgRegionData %>%
   ggplot(aes(x = month, y = avgVaccinated))+
-  geom_line(aes(color = state))
+  geom_line(aes(color = state)) +
+  ggtitle("The avg number of people get vaccinated for each US region from Jan to Nov")
 
 ```
+6. Here we use US map to better visualize the monthly new covid-19 cases for each state on June (lowest monthly new covid-19) and September(highest monthly new covid-19) for each state. 
+
+
+```{r}
+library(mosaic)
+
+CleanCovidCases%>%
+  filter(month == 6) %>%
+  mUSMap(key = "state", fill = "monthlyNewCases") 
+
+
+```
+
+```{r}
+
+CleanCovidCases%>%
+  filter(month == 9) %>%
+  mUSMap(key = "state", fill = "monthlyNewCases")  
+
+```
+
+
+
+
+
+
+
