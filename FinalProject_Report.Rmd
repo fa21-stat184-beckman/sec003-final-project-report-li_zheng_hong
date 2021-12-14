@@ -8,20 +8,18 @@ output: html_notebook
 ## Final Project Report 
 
 
-* Jiayi Li
+* Jiayi Li, Shengkai Zheng, Tianyi Hong
 * December, 14, 2021
 
 
 From 1-20-2021 to 11-10-2021，Which region of the United States (the Northeast, South, West, and Midwest) deals COVID-19 better based on the vaccination rate and Covid-19 cases?
 
 
-Ever since March 2020, the coronavirus pandemic has affected our lives and nearly every corner of the globe. Coronavirus has also been many people’s concern because of its high transmission rate and fatality rate, compared to other infectious diseases. The infected rate of Coronavirus depends on many elements: contact rate, recovery rate, number of people getting vaccinated, and so on. Therefore, the growth of Coronavirus can vary from country to country, region to region, and even weeks to weeks depending on those elements. In this project, we think it is interesting to investigate the growth of Coronavirus with the number of people getting vaccinated in the U.S, and with numerous data related to coronavirus pandemic, we believe that we can get some meaningful insights. More especially, we came up with the research question: “From 1-20-2021 to 11-10-2021, Which region of United States (the Northeast, South, West, and Midwest) deals COVID-19 better based the vaccination rate and Covid-19 cases?”
+Ever since March 2020, the coronavirus pandemic has affected our lives and nearly every corner of the globe. Coronavirus has also been many people’s concern because of its high transmission rate and fatality rate, compared to other infectious diseases. The infected rate of Coronavirus depends on many elements: contact rate, recovery rate, number of people getting vaccinated, and so on. Therefore, the growth of Coronavirus can vary from country to country, region to region, and even weeks to weeks depending on those elements.In this project, we think it is interesting to investigate the growth of Coronavirus with the number of people getting vaccinated in the U.S, and with numerous data related to coronavirus pandemic, we believe that we can get some meaningful insights. More specifically, we came up with the research question: “From 1-20-2021 to 11-10-2021, Which region of United States (the Northeast, South, West, and Midwest) deals COVID-19 better based the vaccination rate and Covid-19 cases?”
 
-The biggest challenge we encountered in this project is the data wrangling part. In this project, we utilize two datasets: StateVaccination, state-by-state data on United States COVID-19 vaccination, and CovidCases, containing aggregate counts of COVID-19 cases and death numbers daily online. To transform these two datasets into the form for visualization and analysis is quite challenging. For example, one of the variables we need is the state that contains states’ names. In the StateVaccination dataset, states’ names are contained in a variable called location. However, some values are invalid for our purpose such as the Bureau of Prisons. To solve this issue, we apply the filter to eliminate all the undesired values. In the CovidCases dataset, the variable state contains all the states’ names. However, states ‘names are in abbreviated forms. To solve that, we use a package called "us data" and leverage the function abbr2state to transform abbreviated names to full names. Another challenge we encountered during the data wrangling part is outliers. There are some outliers in the new_case column in the CovidCases dataset: we notice that for a state like MO and TN, there are some negative values. There is no further information about this attribute provided by the data source that explains about negative values we found. Thus, we took a closer look on our own.
+The biggest challenge we encountered in this project is the data wrangling part. In this project, we utilized two datasets: StateVaccination, state-by-state data on United States COVID-19 vaccination, and CovidCases, containing aggregate counts of COVID-19 cases and death numbers daily online. To transform these two datasets into the form for visualization and analysis is quite challenging. For example, one of the variables we need is state that contains states’ names. In the StateVaccination dataset, states’ names are contained in a variable called location. However, some values are invalid for our purpose such as the Bureau of Prisons. To solve this issue, we applied a filter to eliminate all the undesired values. In the CovidCases dataset, the variable state contains all the states’ names. However, states ‘names are in abbreviated forms. To solve that, we used a package called "us data" and leveraged the function abbr2state to transform abbreviated names to full names. Another challenge we encountered during the data wrangling part is outliers. There are some outliers in the new_case column in the CovidCases dataset: we noticed that for a state like MO and TN, there are some negative values. There is no further information about this attribute provided by the data source that explains about negative values we found. Thus, we took a closer look on our own. We first visualized the distribution of values in the new_case for each state. Based on the figure “New Covid-19 Cases in States (daily)”, we saw that California is among the states which have a lot of negative value for the new case. We tried to take a closer look at the negative new_case in California and found an explanation for those negative values. We found that the new_case for 06/30/2021 is negative: -4359. Meanwhile, the total_cases for 06/30/2021 is 3710454, 4359 less than the total_cases for 06/29/2021. Thus, we can conclude that new_case also accounts for people that are recovered from COVID-19. So, we decided to eliminate the negative value and leave the rest like that since the recovery portion is relatively small compared to the infected portion. It will not disturb our results. There are also some minor challenges we encountered in the data wrangling part, but we were able to use different techniques we learned in class to solve those problems. 
 
-We first visualize the distribution of values in the new_case for each state. Based on the figure “New Covid-19 Cases in States (daily)”, California is among the states which have a lot of negative value for the new case. We try to take a closer look at the negative new_case in California and find an explanation for those negative values. We found that the new_case for 06/30/2021 is negative: -4359. Meanwhile, the total_cases for 06/30/2021 is 3710454, 4359 less than the total_cases for 06/29/2021. Thus, we can conclude that new_case also accounts for people that are recovered from COVID-19. So, we decide to eliminate the negative value and leave the rest like that since the recovery portion is relatively small compared to the infected portion. It will not disturb our results. There are also some minor challenges we encountered in the data wrangling part, but we were able to use different techniques we learned in class to solve those problems. 
-
-Based on the visualizations, we were able to derive some meaningful insights. we found that the overall number of new covid-19 cases in the U.S has been decreased since January, hit the lowest in June, started to increase, and hit the highest point in September. Among the four regions, South seems to have the greatest number of new covid-19 cases in most of the months. There is not a big difference between the other three regions. For the number of people getting vaccinated, people in the South and Mideast are more actively get vaccinated than people in other regions. Overall, the number of people getting vaccinated hit the highest in April and then started to decrease.
+Based on the visualizations, we were able to derive some meaningful insights. we found that the overall number of new covid-19 cases in the U.S has been decreased since January, hit the lowest in June, started to increase, and hit the highest point in September. Among the four regions, South seems to have the greatest number of new covid-19 cases in most of the months which is also confirmed by the visualization on US map.There is not a big difference between the other three regions. For the number of people getting vaccinated, people in the South and Mideast are more actively get vaccinated than people in other regions. Overall, the number of people getting vaccinated hit the highest in April and then started to decrease.
 
 
 
@@ -33,6 +31,7 @@ rm(list = ls())
 library(tidyverse)
 library(dbplyr)
 library(ggplot2)
+library(lubridate)
 ```
 
 
@@ -130,8 +129,6 @@ StateVaccination %>%
 * The variabke date need to be in the interval 2021-1-12 to 2021-11-10
 
 ```{r}
-library(lubridate)
-
 
 StateVaccination <-
 StateVaccination %>%
@@ -175,11 +172,6 @@ CleanedStateVaccination %>% head()
 The variable submission date indicates the date that the data was submitted and recorded of. It is originally character data type, so we first convert it to date date type. Then we create a new attribute called month, taking the month extracted from date.
 
 
-```{r}
-library(lubridate)
-
-```
-
 
 ```{r}
 # create variable month 
@@ -212,10 +204,6 @@ In the primary source, location contains full state name. Thus, to facilitate op
 
 Here we leverage on the abbr2state function  that is provided by the usdata package
 
-```{r}
-install.packages("usdata")
-
-```
 
 ```{r}
 library(usdata)
@@ -349,9 +337,14 @@ RegionData = CombinedData
 ```{r}
 RegionData = convertToRegion(RegionData)
 
-RegionData
+```
+
+```{r}
+RegionData %>%head()
 
 ```
+
+
 * Then we get the avgVaccinated and avgNewCases for each region in each month.
 ```{r}
 avgRegionData <-
@@ -360,7 +353,7 @@ RegionData %>%
   summarize(avgVaccinated = mean(peopleVaccinatedMonthly), avgNewCases = mean(monthlyNewCases))
   
   
-avgRegionData
+avgRegionData %>% head()
 
 ```
 ### Data Visualization
@@ -398,7 +391,8 @@ avgRegionData %>%
 
 ```
 
-4. average number of new covid-19 cases for each US region from Jan to Nov
+4. To better visualize and observe patterns, we only take a look at the covid-19 cases here.
+The average number of new covid-19 cases for each US region from Jan to Nov
 ```{r}
 
 avgRegionData %>%
@@ -408,7 +402,8 @@ avgRegionData %>%
   
 
 ```
-5. The average number of people get vaccinated for each US region from Jan to Nov.
+5. To better visualize and observe patterns, we only take a look at the number of people getting vaccinated here.
+The average number of people get vaccinated for each US region from Jan to Nov.
 
 
 ```{r}
@@ -418,7 +413,7 @@ avgRegionData %>%
   ggtitle("The avg number of people get vaccinated for each US region from Jan to Nov")
 
 ```
-6. Here we use US map to better visualize the monthly new covid-19 cases for each state on June (lowest monthly new covid-19) and September(highest monthly new covid-19) for each state. 
+6 & 7. Here we use US map to better visualize the monthly new covid-19 cases for each state on June (lowest monthly new covid-19) and September(highest monthly new covid-19) for each state. 
 
 
 ```{r}
