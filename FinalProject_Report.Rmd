@@ -1,6 +1,6 @@
 ---
 title: "Final Project Report"
-author: "Jiayi Li"
+author: "Jiayi Li,  Shengkai Zheng, Tianyi Hong"
 date: "Dec, 14, 2021"
 output: html_notebook
 ---
