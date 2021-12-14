@@ -8,10 +8,6 @@ output: html_notebook
 ## Final Project Report 
 
 
-* Jiayi Li, Shengkai Zheng, Tianyi Hong
-* December, 14, 2021
-
-
 From 1-20-2021 to 11-10-2021，Which region of the United States (the Northeast, South, West, and Midwest) deals COVID-19 better based on the vaccination rate and Covid-19 cases?
 
 
